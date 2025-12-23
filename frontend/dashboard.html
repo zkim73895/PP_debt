@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои заявки - Campus Jobs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-briefcase me-2"></i>Campus Jobs
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link text-light" href="index.html">
+                    <i class="bi bi-house-door me-1"></i>Вакансии
+                </a>
+                <button class="btn btn-outline-light btn-sm ms-3" onclick="logout()">
+                    <i class="bi bi-box-arrow-right me-1"></i>Выйти
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">Мои заявки</h1>
+
+                <div class="card mb-4" id="user-info-card" style="display: none;">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h5 class="card-title mb-1" id="user-full-name"></h5>
+                                <p class="card-text text-muted mb-0">
+                                    <i class="bi bi-envelope me-1"></i><span id="user-email"></span>
+                                    <span class="ms-3">
+                                        <i class="bi bi-person-badge me-1"></i><span id="user-type"></span>
+                                    </span>
+                                </p>
+                            </div>
+                            <div>
+                                <span class="badge bg-primary" id="user-status">Активен</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="message-area"></div>
+
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list-check me-2"></i>История заявок
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="applications-container">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Загрузка...</span>
+                                </div>
+                                <p class="mt-3">Загрузка ваших заявок...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <h6 class="card-title">Всего заявок</h6>
+                                        <h2 class="mb-0" id="total-applications">0</h2>
+                                    </div>
+                                    <div>
+                                        <i class="bi bi-file-text fs-1"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-white bg-success">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <h6 class="card-title">Рассмотрено</h6>
+                                        <h2 class="mb-0" id="reviewed-applications">0</h2>
+                                    </div>
+                                    <div>
+                                        <i class="bi bi-check-circle fs-1"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-white bg-warning">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <h6 class="card-title">Ожидает</h6>
+                                        <h2 class="mb-0" id="pending-applications">0</h2>
+                                    </div>
+                                    <div>
+                                        <i class="bi bi-clock fs-1"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="index.html" class="btn btn-outline-primary">
+                        <i class="bi bi-search me-1"></i>Найти новые вакансии
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>

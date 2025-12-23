@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Заполнение БД - Campus Jobs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body text-center p-5">
+                        <h2 class="mb-4">🔄 Заполнение базы данных</h2>
+                        <p class="text-muted mb-4">
+                            Нажмите кнопку ниже, чтобы заполнить базу данных тестовыми данными.
+                            После этого вы сможете протестировать весь функционал.
+                        </p>
+
+                        <div class="mb-4">
+                            <button class="btn btn-primary btn-lg" onclick="seedDatabase()">
+                                <i class="bi bi-database-add"></i> Заполнить БД тестовыми данными
+                            </button>
+                        </div>
+
+                        <div id="result" class="alert" style="display: none;"></div>
+
+                        <hr class="my-4">
+
+                        <div class="text-start">
+                            <h5>Что будет создано:</h5>
+                            <ul>
+                                <li>2 тестовых пользователя (студент и работодатель)</li>
+                                <li>3 тестовые вакансии</li>
+                                <li>1 тестовая заявка</li>
+                                <li>Категории, отделы, навыки</li>
+                            </ul>
+
+                            <h5 class="mt-4">Тестовые учетные данные:</h5>
+                            <div class="card">
+                                <div class="card-body">
+                                    <p><strong>Студент:</strong> student@university.edu / student123</p>
+                                    <p><strong>Работодатель:</strong> employer@university.edu / employer123</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <a href="index.html" class="btn btn-outline-primary">
+                                <i class="bi bi-arrow-left"></i> Вернуться к вакансиям
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function seedDatabase() {
+            const resultEl = document.getElementById('result');
+            const btn = document.querySelector('button');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Заполняем БД...';
+
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/admin/seed');
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultEl.className = 'alert alert-success';
+                    resultEl.style.display = 'block';
+                    resultEl.innerHTML = `
+                        <h5>✅ База данных успешно заполнена!</h5>
+                        <p>${data.message}</p>
+                        <p><strong>Созданные пользователи:</strong></p>
+                        <ul>
+                            <li>${data.test_users[0].email} (${data.test_users[0].type})</li>
+                            <li>${data.test_users[1].email} (${data.test_users[1].type})</li>
+                        </ul>
+                        <p class="mb-0">Теперь вы можете протестировать весь функционал.</p>
+                    `;
+                } else {
+                    throw new Error(data.detail || 'Ошибка сервера');
+                }
+            } catch (error) {
+                resultEl.className = 'alert alert-danger';
+                resultEl.style.display = 'block';
+                resultEl.innerHTML = `
+                    <h5>❌ Ошибка!</h5>
+                    <p>${error.message}</p>
+                    <p class="mb-0">Убедитесь, что сервер запущен на http://localhost:8000</p>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-database-add"></i> Заполнить БД тестовыми данными';
+            }
+        }
+    </script>
+</body>
+</html>
