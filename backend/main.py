@@ -1,5 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from backend import models, database
+from backend.database import get_db, create_tables, seed_initial_data
 
 app = FastAPI(
     title="PP_dept API",
@@ -15,6 +18,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def startup_event():
+    create_tables()
+    seed_initial_data()
+    print("Таблицы БД созданы/проверены")
+
+@app.get("/api/init-db")
+async def init_db():
+    create_tables()
+    seed_initial_data()
+    return {"message": "База данных инициализирована"}
 @app.get("/")
 async def root():
     return {"message": "PP_dept API работает!"}
