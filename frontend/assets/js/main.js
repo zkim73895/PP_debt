@@ -248,8 +248,7 @@ async function loadJobs(categoryId = '', jobType = '') {
 function createJobCard(job) {
     const col = document.createElement('div');
     col.className = 'col-lg-4 col-md-6 mb-4';
-    
-    // Определяем иконку по типу работы
+
     let icon = 'bi-briefcase';
     let typeText = 'Работа';
     if (job.job_type === 'internship') {
@@ -413,8 +412,7 @@ async function loadUserApplications() {
     }
 
     try {
-        // Используем упрощенный эндпоинт
-        const response = await fetch(`${API_BASE_URL}/api/v1/applications-simple`);
+        const response = await fetch(`${API_BASE_URL}/api/v1/applications`);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);

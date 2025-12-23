@@ -77,7 +77,6 @@ class ApplicationCreate(ApplicationBase):
     pass
 
 
-# Обновите ApplicationResponse
 class ApplicationResponse(BaseModel):
     id: int
     user_id: int
@@ -90,7 +89,6 @@ class ApplicationResponse(BaseModel):
         from_attributes = True
 
 
-# Обновите ApplicationDetailResponse
 class ApplicationDetailResponse(BaseModel):
     id: int
     user_id: int
@@ -99,13 +97,12 @@ class ApplicationDetailResponse(BaseModel):
     cover_letter: Optional[str] = None
     created_at: datetime
     job: Optional[dict] = None
-    user: Optional[dict] = None  # Просто dict, не UserResponse
+    user: Optional[dict] = None
 
     class Config:
         from_attributes = True
 
 
-# Создайте упрощенную схему пользователя для ответов
 class UserSimpleResponse(BaseModel):
     id: int
     email: str

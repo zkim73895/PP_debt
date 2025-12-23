@@ -30,7 +30,6 @@ if os.path.exists(FRONTEND_PATH):
     print(f"✅ Статические файлы настроены: {FRONTEND_PATH}")
 else:
     print(f"⚠️  Папка фронтенда не найдена: {FRONTEND_PATH}")
-    # Создаем временную папку для тестов
     os.makedirs(FRONTEND_PATH, exist_ok=True)
 
 app.add_middleware(
@@ -113,46 +112,6 @@ def get_jobs(
         query = query.filter(Job.category_id == category_id)
 
     jobs = query.order_by(Job.created_at.desc()).offset(skip).limit(limit).all()
-
-    if not jobs:
-        print("⚠️ Нет вакансий в БД, создаем тестовые...")
-        from .database import Category, Department, EmployerProfile
-
-        category = db.query(Category).first()
-        department = db.query(Department).first()
-        employer = db.query(EmployerProfile).first()
-
-        if category and department and employer:
-            test_jobs = [
-                Job(
-                    title="Ассистент преподавателя",
-                    description="Помощь в проведении лабораторных работ",
-                    requirements="Знание Python",
-                    salary="15000 руб./мес.",
-                    job_type="part_time",
-                    category_id=category.id,
-                    department_id=department.id,
-                    employer_id=employer.id,
-                    is_active=True
-                ),
-                Job(
-                    title="Исследователь",
-                    description="Научная работа",
-                    requirements="Аналитическое мышление",
-                    salary="20000 руб./мес.",
-                    job_type="internship",
-                    category_id=category.id,
-                    department_id=department.id,
-                    employer_id=employer.id,
-                    is_active=True
-                )
-            ]
-
-            for job in test_jobs:
-                db.add(job)
-            db.commit()
-
-            jobs = db.query(Job).filter(Job.is_active == True).all()
 
     return jobs
 
@@ -309,7 +268,6 @@ def get_applications(
                 "created_at": app.created_at
             }
 
-            # Добавляем информацию о вакансии если есть
             if app.job:
                 app_data["job"] = {
                     "id": app.job.id,
@@ -317,7 +275,6 @@ def get_applications(
                     "salary": app.job.salary
                 }
 
-            # Добавляем информацию о пользователе если есть
             if app.user:
                 app_data["user"] = {
                     "id": app.user.id,
@@ -335,11 +292,41 @@ def get_applications(
         raise HTTPException(status_code=500, detail="Ошибка сервера")
 
 
-@app.get("/api/v1/applications", response_model=List[schemas.ApplicationDetailResponse])
-def get_applications(db: Session = Depends(get_db)):
-    """Получить список заявок"""
-    applications = db.query(Application).all()
-    return applications
+@app.post("/api/v1/applications", response_model=schemas.ApplicationResponse)
+def create_application(
+        application: schemas.ApplicationCreate,
+        db: Session = Depends(get_db),
+):
+    """Создать заявку на вакансию"""
+    try:
+        # Проверяем, существует ли вакансия
+        job = db.query(Job).filter(Job.id == application.job_id, Job.is_active == True).first()
+        if not job:
+            raise HTTPException(status_code=404, detail="Вакансия не найдена или неактивна")
+
+        test_user = db.query(User).filter(User.email == "student@university.edu").first()
+        if not test_user:
+            raise HTTPException(status_code=400, detail="Тестовый пользователь не найден")
+
+        db_application = Application(
+            user_id=test_user.id,
+            job_id=application.job_id,
+            cover_letter=application.cover_letter,
+            status="pending"
+        )
+
+        db.add(db_application)
+        db.commit()
+        db.refresh(db_application)
+
+        return db_application
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Ошибка создания заявки: {e}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
 
 
 @app.post("/api/v1/admin/seed")
@@ -421,7 +408,7 @@ def seed_database(db: Session = Depends(get_db)):
             title="Ассистент преподавателя",
             description="Помощь в проведении лабораторных работ",
             requirements="Знание Python",
-            salary="15000 руб./мес.",
+            salary="90000 руб./мес.",
             job_type="part_time",
             category_id=category.id,
             department_id=department.id,
@@ -435,7 +422,7 @@ def seed_database(db: Session = Depends(get_db)):
             title="Исследователь",
             description="Научная работа в лаборатории",
             requirements="Аналитическое мышление",
-            salary="20000 руб./мес.",
+            salary="60000 руб./мес.",
             job_type="internship",
             category_id=category.id,
             department_id=department.id,
@@ -445,7 +432,7 @@ def seed_database(db: Session = Depends(get_db)):
         )
         db.add(job2)
 
-        print("📝 Создаем тестовую заявку...")
+        print("Создаем тестовую заявку...")
 
         application = Application(
             user_id=student_user.id,

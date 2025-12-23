@@ -48,7 +48,7 @@ class StudentProfile(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True)
-    student_id = Column(String(20), unique=True)  # Номер студенческого
+    student_id = Column(String(20), unique=True)
     faculty = Column(String(100))
     course = Column(Integer)
     phone = Column(String(20))
@@ -114,7 +114,7 @@ class Job(Base):
     description = Column(Text, nullable=False)
     requirements = Column(Text)
     salary = Column(String(50))
-    job_type = Column(String(30))  # internship, part_time, full_time
+    job_type = Column(String(30))
     category_id = Column(Integer, ForeignKey("categories.id"))
     department_id = Column(Integer, ForeignKey("departments.id"))
     employer_id = Column(Integer, ForeignKey("employer_profiles.id"))
@@ -136,7 +136,7 @@ class Application(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     job_id = Column(Integer, ForeignKey("jobs.id"))
-    status = Column(String(20), default="pending")  # pending, reviewed, accepted, rejected
+    status = Column(String(20), default="pending")
     cover_letter = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
