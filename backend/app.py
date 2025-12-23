@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List, Optional
 import datetime
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
 
 from backend.database import get_db, create_tables, seed_initial_data
 from backend import schemas
@@ -20,9 +23,19 @@ app = FastAPI(
     redoc_url="/api/redoc"
 )
 
+FRONTEND_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+
+if os.path.exists(FRONTEND_PATH):
+    app.mount("/frontend", StaticFiles(directory=FRONTEND_PATH, html=True), name="frontend")
+    print(f"✅ Статические файлы настроены: {FRONTEND_PATH}")
+else:
+    print(f"⚠️  Папка фронтенда не найдена: {FRONTEND_PATH}")
+    # Создаем временную папку для тестов
+    os.makedirs(FRONTEND_PATH, exist_ok=True)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -277,51 +290,49 @@ def login(credentials: schemas.UserLogin, db: Session = Depends(get_db)):
     }
 
 
-@app.get("/api/v1/applications", response_model=List[schemas.ApplicationDetailResponse])
+@app.get("/api/v1/applications")
 def get_applications(
-        user_id: Optional[int] = None,
-        job_id: Optional[int] = None,
         db: Session = Depends(get_db)
 ):
-    """Получить список заявок ИЗ БАЗЫ ДАННЫХ"""
-    query = db.query(Application)
+    """Получить список заявок - УПРОЩЕННАЯ ВЕРСИЯ"""
+    try:
+        applications = db.query(Application).all()
 
-    if user_id:
-        query = query.filter(Application.user_id == user_id)
-
-    if job_id:
-        query = query.filter(Application.job_id == job_id)
-
-    applications = query.all()
-
-    result = []
-    for app in applications:
-        app_data = {
-            "id": app.id,
-            "user_id": app.user_id,
-            "job_id": app.job_id,
-            "status": app.status,
-            "cover_letter": app.cover_letter,
-            "created_at": app.created_at
-        }
-
-        if app.job:
-            app_data["job"] = {
-                "id": app.job.id,
-                "title": app.job.title,
-                "salary": app.job.salary
+        result = []
+        for app in applications:
+            app_data = {
+                "id": app.id,
+                "user_id": app.user_id,
+                "job_id": app.job_id,
+                "status": app.status,
+                "cover_letter": app.cover_letter,
+                "created_at": app.created_at
             }
 
-        if app.user:
-            app_data["user"] = {
-                "id": app.user.id,
-                "email": app.user.email,
-                "full_name": app.user.full_name
-            }
+            # Добавляем информацию о вакансии если есть
+            if app.job:
+                app_data["job"] = {
+                    "id": app.job.id,
+                    "title": app.job.title,
+                    "salary": app.job.salary
+                }
 
-        result.append(app_data)
+            # Добавляем информацию о пользователе если есть
+            if app.user:
+                app_data["user"] = {
+                    "id": app.user.id,
+                    "email": app.user.email,
+                    "full_name": app.user.full_name,
+                    "user_type": app.user.user_type
+                }
 
-    return result
+            result.append(app_data)
+
+        return result
+
+    except Exception as e:
+        print(f"❌ Ошибка при получении заявок: {e}")
+        raise HTTPException(status_code=500, detail="Ошибка сервера")
 
 
 @app.get("/api/v1/applications", response_model=List[schemas.ApplicationDetailResponse])
@@ -486,3 +497,25 @@ def get_stats(db: Session = Depends(get_db)):
         "notifications": db.query(Notification).count(),
         "timestamp": datetime.datetime.now().isoformat()
     }
+
+
+@app.get("/")
+def serve_frontend():
+    """Перенаправляем на фронтенд"""
+    return FileResponse(os.path.join(FRONTEND_PATH, "index.html"))
+
+
+@app.get("/frontend/{path:path}")
+def serve_frontend_file(path: str):
+    """Обслуживаем файлы из папки frontend"""
+    file_path = os.path.join(FRONTEND_PATH, path)
+
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    else:
+        # Если файл не найден, пробуем добавить .html
+        html_path = file_path + ".html"
+        if os.path.exists(html_path):
+            return FileResponse(html_path)
+        else:
+            raise HTTPException(status_code=404, detail="Файл не найден")

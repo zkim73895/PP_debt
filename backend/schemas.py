@@ -77,11 +77,40 @@ class ApplicationCreate(ApplicationBase):
     pass
 
 
-class ApplicationResponse(ApplicationBase):
+# Обновите ApplicationResponse
+class ApplicationResponse(BaseModel):
     id: int
     user_id: int
+    job_id: Optional[int] = None  # Может быть None
     status: str
+    cover_letter: Optional[str] = None
     created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# Обновите ApplicationDetailResponse
+class ApplicationDetailResponse(BaseModel):
+    id: int
+    user_id: int
+    job_id: Optional[int] = None
+    status: str
+    cover_letter: Optional[str] = None
+    created_at: datetime
+    job: Optional[dict] = None
+    user: Optional[dict] = None  # Просто dict, не UserResponse
+
+    class Config:
+        from_attributes = True
+
+
+# Создайте упрощенную схему пользователя для ответов
+class UserSimpleResponse(BaseModel):
+    id: int
+    email: str
+    full_name: str
+    user_type: str
 
     class Config:
         from_attributes = True
