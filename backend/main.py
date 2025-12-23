@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
-    title="Campus Jobs API",
+    title="PP_dept API",
     description="API для платформы вакансий университета",
     version="1.0.0"
 )
@@ -17,7 +17,7 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "Campus Jobs API работает!"}
+    return {"message": "PP_dept API работает!"}
 
 @app.get("/health")
 async def health_check():
