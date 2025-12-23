@@ -10,7 +10,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
-    user_type: str  # student, employer
+    user_type: str
 
     @validator('user_type')
     def validate_user_type(cls, v):

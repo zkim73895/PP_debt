@@ -11,7 +11,7 @@ from backend.database import get_db, create_tables, seed_initial_data
 from backend import schemas
 from backend.database import (
     User, StudentProfile, EmployerProfile, Department,
-    Category, Skill, Job, Application, Notification, ApplicationStatus
+    Category, Skill, Job, Application, Notification
 )
 
 app = FastAPI(
@@ -299,7 +299,6 @@ def create_application(
 ):
     """Создать заявку на вакансию"""
     try:
-        # Проверяем, существует ли вакансия
         job = db.query(Job).filter(Job.id == application.job_id, Job.is_active == True).first()
         if not job:
             raise HTTPException(status_code=404, detail="Вакансия не найдена или неактивна")
@@ -500,7 +499,6 @@ def serve_frontend_file(path: str):
     if os.path.exists(file_path):
         return FileResponse(file_path)
     else:
-        # Если файл не найден, пробуем добавить .html
         html_path = file_path + ".html"
         if os.path.exists(html_path):
             return FileResponse(html_path)
